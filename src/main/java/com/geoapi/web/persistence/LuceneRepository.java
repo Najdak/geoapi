@@ -28,7 +28,7 @@ public class LuceneRepository {
 
     @Value("${geo_index_dir}")
     private String geo_index_dir;
-    
+
     public Map<String, Object> getGeoIndexByQuery(String geoName) {
         Map<String, Object> result = new HashMap<>();
         List<GeoDocument> resultDocs = new LinkedList<>();
