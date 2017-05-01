@@ -1,6 +1,7 @@
 package com.geoapi.web.services;
 
 import com.geoapi.helpers.FuzzyMatch;
+import com.geoapi.web.models.GeoDocument;
 import com.geoapi.web.persistence.LuceneRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -23,7 +24,7 @@ public class GeoService {
             Float top1Score = (Float) stringObjectMap.get("top1Score");
             Float top10Score = (Float) stringObjectMap.get("top10Score");
             Float top3Score = (Float) stringObjectMap.get("top3Score");
-            List<Map<String, Object>> geoRes = (List<Map<String, Object>>) stringObjectMap.get("documents");
+            List<GeoDocument> geoRes = (List<GeoDocument>) stringObjectMap.get("documents");
             String qq = query.replaceAll("[0-9]|[A-Z]{2}", "").trim().toLowerCase();
 
             Set<String> querySet = new TreeSet<>();
@@ -32,10 +33,10 @@ public class GeoService {
                 querySet.add(stringTokenizer.nextToken());
             }
             Map<Float, String> geoIndexHits = new TreeMap<>();
-            for (Map<String, Object> geoRe : geoRes) {
+            for (GeoDocument geoRe : geoRes) {
                 Set<String> hits = new LinkedHashSet<>();
                 Set<String> geoNames = new TreeSet<>();
-                StringTokenizer stringTokenizer1 = new StringTokenizer(geoRe.get("geoName").toString());
+                StringTokenizer stringTokenizer1 = new StringTokenizer(geoRe.getName().toString());
                 while (stringTokenizer1.hasMoreTokens()) {
                     geoNames.add(stringTokenizer1.nextToken());
                 }
@@ -55,11 +56,6 @@ public class GeoService {
                 }
             }
             float editDistance = Collections.max(geoIndexHits.keySet());
-            String livenstainName = "";
-            if (!geoIndexHits.isEmpty()) {
-                livenstainName = geoIndexHits.get(editDistance);
-                livenstainName = livenstainName.replaceAll("[\\[|\\]]", "");
-            }
             if (
                     (totalHits > 1000 && Float.compare(top10Score, (float) 2) == 1) ||
                             Float.compare(top1Score, (float) 10) == 1 ||

@@ -1,5 +1,6 @@
 package com.geoapi.web.persistence;
 
+import com.geoapi.web.models.GeoDocument;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
@@ -30,14 +31,14 @@ public class LuceneRepository {
     
     public Map<String, Object> getGeoIndexByQuery(String geoName) {
         Map<String, Object> result = new HashMap<>();
-        List<Map<String, Object>> resultDocs = new LinkedList<>();
+        List<GeoDocument> resultDocs = new LinkedList<>();
 
         try (Directory directory = new SimpleFSDirectory(new File(geo_index_dir));
              DirectoryReader ireader = DirectoryReader.open(directory)) {
             IndexSearcher indexSearcher = new IndexSearcher(ireader);
 
             Analyzer analyzer = new StandardAnalyzer();
-            QueryParser parser = new QueryParser("name", analyzer);
+            QueryParser parser = new QueryParser("search_names", analyzer);
             Query query = parser.parse(geoName);
             TopDocs topDocs = indexSearcher.search(query, 10);
             if (topDocs.totalHits > 0) {
@@ -62,10 +63,28 @@ public class LuceneRepository {
                 for (ScoreDoc csoreDoc : scoreDocs) {
                     Document doc = indexSearcher.doc(csoreDoc.doc);
                     float score = csoreDoc.score;
-                    Map<String, Object> element = new HashMap<>();
-                    element.put("geoName", doc.get("name"));
-                    element.put("score", score);
-                    resultDocs.add(element);
+                    resultDocs.add(new GeoDocument(
+                            doc.get("geonameid"),
+                            doc.get("name"),
+                            score,
+                            doc.get("asciiname"),
+                            doc.get("alternatenames"),
+                            doc.get("search_names"),
+                            doc.get("latitude"),
+                            doc.get("longitude"),
+                            doc.get("feature_class"),
+                            doc.get("feature_code"),
+                            doc.get("country_code"),
+                            doc.get("cc2"),
+                            doc.get("admin1_code"),
+                            doc.get("admin2_code"),
+                            doc.get("admin3_code"),
+                            doc.get("admin4_code"),
+                            doc.get("population"),
+                            doc.get("elevation"),
+                            doc.get("dem"),
+                            doc.get("timezone"),
+                            doc.get("modification_date")));
                 }
 
                 result.put("documents", resultDocs);
