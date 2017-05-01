@@ -27,12 +27,7 @@ public class LuceneRepository {
 
     @Value("${geo_index_dir}")
     private String geo_index_dir;
-
-    public String met(String s){
-
-        return s + " =GOVNO";
-    }
-
+    
     public Map<String, Object> getGeoIndexByQuery(String geoName) {
         Map<String, Object> result = new HashMap<>();
         List<Map<String, Object>> resultDocs = new LinkedList<>();
@@ -44,7 +39,6 @@ public class LuceneRepository {
             Analyzer analyzer = new StandardAnalyzer();
             QueryParser parser = new QueryParser("name", analyzer);
             Query query = parser.parse(geoName);
-            long lukeQueryToGeoIndex = System.currentTimeMillis();
             TopDocs topDocs = indexSearcher.search(query, 10);
             if (topDocs.totalHits > 0) {
 //                LOGGER.info("[MAP] Retrieving results from GEO-INDEX in {} ms", System.currentTimeMillis() - lukeQueryToGeoIndex);

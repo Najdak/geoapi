@@ -13,9 +13,9 @@ public class GeoService {
     @Autowired
     private LuceneRepository luceneRepository;
 
-    public String met(String s){
+    public String getResult(String query){
 
-        Map<String, Object> stringObjectMap = luceneRepository.getGeoIndexByQuery(s);
+        Map<String, Object> stringObjectMap = luceneRepository.getGeoIndexByQuery(query);
 
         if (!stringObjectMap.isEmpty()) {
 
@@ -24,7 +24,7 @@ public class GeoService {
             Float top10Score = (Float) stringObjectMap.get("top10Score");
             Float top3Score = (Float) stringObjectMap.get("top3Score");
             List<Map<String, Object>> geoRes = (List<Map<String, Object>>) stringObjectMap.get("documents");
-            String qq = s.replaceAll("[0-9]|[A-Z]{2}", "").trim().toLowerCase();
+            String qq = query.replaceAll("[0-9]|[A-Z]{2}", "").trim().toLowerCase();
 
             Set<String> querySet = new TreeSet<>();
             StringTokenizer stringTokenizer = new StringTokenizer(qq.toLowerCase());
@@ -50,7 +50,7 @@ public class GeoService {
                 }
                 float line = Math.max((float) querySet.size(), (float) geoNames.size());
                 float geoToken = 100 * (float) hits.size() / line;
-                if (hits.size() > 0) {
+                if (hits.isEmpty()) {
                     geoIndexHits.put(geoToken, geoNames.toString());
                 }
             }
@@ -72,15 +72,7 @@ public class GeoService {
         }
 //        } else LOGGER.info("[MAP] Qery: [" + newQuery + "] not in the geo-index");
 
-
-
-
-
-
-
-
-
-        return luceneRepository.met(s);
+        return query;
     }
 
 }

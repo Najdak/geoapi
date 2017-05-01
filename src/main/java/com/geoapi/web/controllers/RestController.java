@@ -1,6 +1,5 @@
 package com.geoapi.web.controllers;
 
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -16,7 +15,7 @@ public class RestController {
     @RequestMapping(value = "/{q}")
     public String api(@PathVariable (name = "q", required = false) String q){
 
-        return geoService.met(q);
+        return geoService.getResult(q);
     }
 
 }

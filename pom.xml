@@ -63,7 +63,7 @@
 			<artifactId>guava</artifactId>
 			<version>19.0</version>
 		</dependency>
-
+		
 		<!--Apache Lucene-->
 		<dependency>
 			<groupId>org.apache.lucene</groupId>
