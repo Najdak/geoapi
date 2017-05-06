@@ -18,10 +18,7 @@ import org.springframework.stereotype.Repository;
 import org.apache.lucene.search.Query;
 import java.io.File;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Repository
 public class LuceneRepository {
@@ -31,14 +28,14 @@ public class LuceneRepository {
 
     public Map<String, Object> getGeoIndexByQuery(String geoName) {
         Map<String, Object> result = new HashMap<>();
-        List<GeoDocument> resultDocs = new LinkedList<>();
+        Set<GeoDocument> resultDocs = new HashSet<>();
 
         try (Directory directory = new SimpleFSDirectory(new File(geo_index_dir));
              DirectoryReader ireader = DirectoryReader.open(directory)) {
             IndexSearcher indexSearcher = new IndexSearcher(ireader);
 
             Analyzer analyzer = new StandardAnalyzer();
-            QueryParser parser = new QueryParser("search_names", analyzer);
+            QueryParser parser = new QueryParser("name", analyzer);
             Query query = parser.parse(geoName);
             TopDocs topDocs = indexSearcher.search(query, 10);
             if (topDocs.totalHits > 0) {
@@ -51,7 +48,7 @@ public class LuceneRepository {
                 float top3Score = 0;
                 float sum = 0;
                 for (int i = 0; i < scoreDocs.length; i++) {
-                    if (i == 3) {
+                    if (((scoreDocs.length < 3)&&(i==1)) || (i == 3)) {
                         top3Score = sum / 3;
                     }
                     sum += scoreDocs[i].score;

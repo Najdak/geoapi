@@ -1,10 +1,11 @@
 package com.geoapi.web.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 
 @Data
 public class GeoDocument {
-
+    @JsonIgnore
     private String id;
     private String name;
     private float ratio;
