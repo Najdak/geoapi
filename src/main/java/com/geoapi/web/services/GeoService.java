@@ -19,27 +19,47 @@ public class GeoService {
 
     private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
 
-    public Set<GeoDocument> getGeoIndexResult(String query){
 
-        Map<String, Object> geoIndexResultMap = getGeoIndexResultMap(query);
+    public List<GeoDocument> getResult(String query) {
 
-        if (!geoIndexResultMap.isEmpty()){
-            if (isGeoQueryCheck(geoIndexResultMap)){
-                return (Set<GeoDocument>) geoIndexResultMap.get("documents");
+        List<GeoDocument> result = getGeoIndexResult(query);
+        if (result.isEmpty()){
+            String[] strings = query.replaceAll("[0-9]|[A-Z]{2}", "").trim().split("\\s+");
+            if (strings.length > 1) {
+                String[] queryTokens = Arrays.copyOf(strings, 2);
+                LOGGER.info("[MAP] Start tokenize search by words:" +Arrays.toString(queryTokens));
+                int hits = 0;
+                for (String token : queryTokens) {
+                    if (!getGeoIndexResult(token).isEmpty()) hits++;
+                }
+                if (hits==2){
+                    LOGGER.info("[MAP] first two words:" +Arrays.toString(queryTokens)+" is geo words - query:["+query+"] IS geo query");
+                    return (List<GeoDocument>) getGeoIndexResultMap(query).get("documents");
+                }
+                LOGGER.info("[MAP] first two words:" +Arrays.toString(queryTokens)+" is NOT geo words - query:["+query+"] is NOT geo query");
             }
         }
+        return result;
+    }
 
-        return new HashSet<>();
+    public List<GeoDocument> getGeoIndexResult(String query){
+        Map<String, Object> geoIndexResultMap = getGeoIndexResultMap(query);
+        if (!geoIndexResultMap.isEmpty()){
+            if (isGeoQueryCheck(geoIndexResultMap)){
+                return (List<GeoDocument>) geoIndexResultMap.get("documents");
+            }
+        }
+        return new ArrayList<>();
     }
 
     private Map<String, Object> getGeoIndexResultMap(String query) {
         Map<String, Object> geoIndexResultMap = luceneRepository.getGeoIndexByQuery(StringUtils.stripAccents(query.trim()));
         if (!geoIndexResultMap.isEmpty()) {
             geoIndexResultMap.put("query", query);
-            Set<GeoDocument> geoRes = (Set<GeoDocument>) geoIndexResultMap.get("documents");
+            List<GeoDocument> geoRes = (List<GeoDocument>) geoIndexResultMap.get("documents");
             String qq = query.replaceAll("[0-9]|[A-Z]{2}", "").trim().toLowerCase();
 
-            List<String> querySet = Arrays.asList(qq.split("\\s"));
+            List<String> querySet = Arrays.asList(qq.split("\\s+"));
 
             Map<Float, String> geoIndexHits = new TreeMap<>();
 
@@ -53,7 +73,7 @@ public class GeoService {
 
                 for (String geoName : geoNames) {
                     for (String queryToken : querySet) {
-                        int redDist = FuzzyMatch.calculateLevenshteinDistance(queryToken.toLowerCase().trim(), geoName.toLowerCase().trim());
+                        int redDist = FuzzyMatch.calculateWordsSimilarity(queryToken.toLowerCase().trim(), geoName.toLowerCase().trim());
                         if (redDist >= 85) {
                             hits.add(queryToken.toLowerCase().trim());
                             break;
@@ -66,7 +86,7 @@ public class GeoService {
                 geoIndexHits.put(geoToken, geoNames.toString());
             }
 
-            float editDistance = 0;
+            float editDistance;
             editDistance = Collections.max(geoIndexHits.keySet());
             geoIndexResultMap.put("editDistance", editDistance);
             return geoIndexResultMap;
@@ -86,8 +106,7 @@ public class GeoService {
                         Float.compare(top1Score, (float) 10) == 1 ||
                         Float.compare(top10Score, (float) 7) == 1 ||
                         (Float.compare(top3Score, (float) 5) == 1 && Float.compare(editDistance, (float) 70) == 1 && totalHits > 50) ||
-                        (Float.compare(editDistance, (float) 90) == 1) ||
-                        (totalHits > 30000 && Float.compare(editDistance, 50f) > -1)
+                        (Float.compare(editDistance, (float) 90) == 1)
                 ) {
             LOGGER.info("[MAP] Qery: [" + query + "] IS geo query");
             return true;

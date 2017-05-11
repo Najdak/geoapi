@@ -12,6 +12,8 @@ import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.SimpleFSDirectory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Repository;
 
@@ -23,12 +25,14 @@ import java.util.*;
 @Repository
 public class LuceneRepository {
 
+    private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
+
     @Value("${geo_index_dir}")
     private String geo_index_dir;
 
     public Map<String, Object> getGeoIndexByQuery(String geoName) {
         Map<String, Object> result = new HashMap<>();
-        Set<GeoDocument> resultDocs = new HashSet<>();
+        List<GeoDocument> resultDocs = new ArrayList<>();
 
         try (Directory directory = new SimpleFSDirectory(new File(geo_index_dir));
              DirectoryReader ireader = DirectoryReader.open(directory)) {
@@ -39,7 +43,6 @@ public class LuceneRepository {
             Query query = parser.parse(geoName);
             TopDocs topDocs = indexSearcher.search(query, 10);
             if (topDocs.totalHits > 0) {
-//                LOGGER.info("[MAP] Retrieving results from GEO-INDEX in {} ms", System.currentTimeMillis() - lukeQueryToGeoIndex);
                 Integer totalHits = topDocs.totalHits;
                 ScoreDoc[] scoreDocs = topDocs.scoreDocs;
                 result.put("totalHits", totalHits);
@@ -83,11 +86,10 @@ public class LuceneRepository {
                             doc.get("timezone"),
                             doc.get("modification_date")));
                 }
-
                 result.put("documents", resultDocs);
             }
         } catch (ParseException | IOException e) {
-//            LOGGER.error(e.getMessage(), e);
+            LOGGER.error(e.getMessage(), e);
         }
         return result;
     }
