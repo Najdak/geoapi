@@ -25,24 +25,75 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 public class RestControllerTest {
     private MockMvc restAdverseGroupMockMvc;
-
     @Autowired
     WebApplicationContext webApplicationContext;
-//    @Autowired
-//    private GeoService geoService;
-//
-//    @Autowired
-//    private LuceneRepository luceneRepository;
     @Before
     public void setUp() throws Exception {
-        RestController restController = new RestController();
-//        ReflectionTestUtils.setField(geoService, "luceneRepository", luceneRepository);
-//        ReflectionTestUtils.setField(restController, "geoService", geoService);
         this.restAdverseGroupMockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
     }
     @Test
-    public void api() throws Exception {
+    public void balti() throws Exception {
         restAdverseGroupMockMvc.perform(get("/api").param("q", "balti"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].isGeo", Is.is(true)));
+    }
+        @Test
+    public void marseilleFrance() throws Exception {
+        restAdverseGroupMockMvc.perform(get("/api").param("q", "marseille France"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].isGeo", Is.is(true)));
+    }
+        @Test
+    public void universitateaDe() throws Exception {
+        restAdverseGroupMockMvc.perform(get("/api").param("q", "univerisitatea de"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].isGeo", Is.is(false)));
+    }
+        @Test
+    public void boston() throws Exception {
+        restAdverseGroupMockMvc.perform(get("/api").param("q", "Boston"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].isGeo", Is.is(true)));
+    }
+        @Test
+    public void newYork() throws Exception {
+        restAdverseGroupMockMvc.perform(get("/api").param("q", "new york"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].isGeo", Is.is(true)));
+    }
+        @Test
+    public void london() throws Exception {
+        restAdverseGroupMockMvc.perform(get("/api").param("q", "London"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].isGeo", Is.is(true)));
+    }
+        @Test
+    public void chisinau() throws Exception {
+        restAdverseGroupMockMvc.perform(get("/api").param("q", "Chisinau"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].isGeo", Is.is(true)));
+    }
+        @Test
+    public void moldova() throws Exception {
+        restAdverseGroupMockMvc.perform(get("/api").param("q", "MOLDOVA"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].isGeo", Is.is(true)));
+    }
+        @Test
+    public void sanDiego() throws Exception {
+        restAdverseGroupMockMvc.perform(get("/api").param("q", "san diego"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].isGeo", Is.is(true)));
+    }
+        @Test
+    public void santoDoMingo() throws Exception {
+        restAdverseGroupMockMvc.perform(get("/api").param("q", "santo do mingo"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].isGeo", Is.is(true)));
+    }
+        @Test
+    public void iablona() throws Exception {
+        restAdverseGroupMockMvc.perform(get("/api").param("q", "iablona"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].isGeo", Is.is(true)));
     }

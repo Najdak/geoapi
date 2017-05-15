@@ -14,4 +14,8 @@ public class FuzzyMatch {
         return 100 - new Double(ratio * 100).intValue();
     }
 
+
+    public static int calc(int i){
+        return i<<1;
+    }
 }
